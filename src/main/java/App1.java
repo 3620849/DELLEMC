@@ -2,7 +2,6 @@ import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,7 +21,7 @@ public class App1 {
         app.exploreGraph(root);
         app.print(root, 0);
         app.print(root, 1);
-
+        new ZipUtils("zip/myDb.zip");
     }
 
     public void exploreGraph(Node root) {
