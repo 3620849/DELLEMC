@@ -11,9 +11,10 @@ public class ZipUtils {
 
     private List <String> fileList;
 
-    private static final String SOURCE_FOLDER = "var/myDb"; // SourceFolder path
+    private final String SOURCE_FOLDER ; // SourceFolder path
 
-    public ZipUtils(String OUTPUT_ZIP_FILE) {
+    public ZipUtils(String sourcePath,String OUTPUT_ZIP_FILE) {
+        this.SOURCE_FOLDER = sourcePath;
         fileList = new ArrayList < String > ();
         generateFileList(new File(SOURCE_FOLDER));
         zipIt(OUTPUT_ZIP_FILE);

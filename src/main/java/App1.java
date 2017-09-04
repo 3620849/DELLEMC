@@ -21,7 +21,6 @@ public class App1 {
         app.exploreGraph(root);
         app.print(root, 0);
         app.print(root, 1);
-        new ZipUtils("zip/myDb.zip");
     }
 
     public void exploreGraph(Node root) {
@@ -90,6 +89,7 @@ public class App1 {
         return result;
     }
     public void print(Node root, int type) {
+
         if(type<0 || type>1){
             throw new IllegalArgumentException("argument type should be 0 or 1");
         }
@@ -111,6 +111,7 @@ public class App1 {
             }
             System.out.println(res);
             tx.success();
+
         }
     }
     private Traverser traverseBFS(Node root) {
@@ -155,6 +156,7 @@ public class App1 {
             public void run()
             {
                 graphDb.shutdown();
+                new ZipUtils("var/myDb","zip/myDb.zip");
             }
         } );
     }

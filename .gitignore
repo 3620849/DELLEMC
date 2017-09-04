@@ -3,7 +3,8 @@
 *.war
 *.jar
 *.ear
-
+*.zip
+var/myDb/*
 DellEMC.iml
 target/
 
