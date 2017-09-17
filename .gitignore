@@ -4,7 +4,7 @@
 *.jar
 *.ear
 *.zip
-var/myDb/*
+var/*
 DellEMC.iml
 target/
 

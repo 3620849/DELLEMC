@@ -2,14 +2,16 @@ import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 public class App1 {
     //DB settings
-    private File file = new File("var/myDb");
-    private GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(file);
+    private static final String DB_PATH = "var/myDb";
+    private GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(DB_PATH));
     private final int MAX_OCCURRENCES = 2;
     private final int MAX_GRAPH_SIZE = Lbl.values().length*MAX_OCCURRENCES;
     private int countNodes = 0;
@@ -19,8 +21,9 @@ public class App1 {
         app.cleanDb();
         Node root = app.createRootNode();
         app.exploreGraph(root);
-        app.print(root, 0);
-        app.print(root, 1);
+        app.print2(root,node ->  System.out.print("<"+node.endNode().getProperty("id")+"> "));
+        app.print2(root,node ->  System.out.print("{\"id\":\"" + node.endNode().getProperty("id") + "\",\"type\":\"" +
+                node.endNode().getProperty("type") + "\"} "));
     }
 
     public void exploreGraph(Node root) {
@@ -88,39 +91,20 @@ public class App1 {
         }
         return result;
     }
-    public void print(Node root, int type) {
-
-        if(type<0 || type>1){
-            throw new IllegalArgumentException("argument type should be 0 or 1");
-        }
+    public void print2(Node root, Consumer<Path> consumer){
         try (Transaction tx = graphDb.beginTx()) {
             Traverser traverseBFS = traverseBFS(root);
-            String res = "";
-            switch (type) {
-                case 0:
-                    for (Path nodePath : traverseBFS) {
-                        res += "<" + nodePath.endNode().getProperty("id") + "> ";
-                    }
-                    break;
-                case 1:
-                    for (Path nodePath : traverseBFS) {
-                        res += "{\"id\":\"" + nodePath.endNode().getProperty("id") + "\",\"type\":\"" +
-                                nodePath.endNode().getProperty("type") + "\"} ";
-                    }
-                    break;
-            }
-            System.out.println(res);
+            traverseBFS.forEach(consumer::accept);
+            System.out.println();
             tx.success();
-
         }
     }
+
     private Traverser traverseBFS(Node root) {
         TraversalDescription td = graphDb.traversalDescription().breadthFirst()
                 .relationships(Rls.RELATE, Direction.OUTGOING)
                 .relationships(Rls.HAS, Direction.OUTGOING)
-                .relationships(Rls.CONTAINS, Direction.OUTGOING)
-                /*.sort((o1,o2)->(int) (o1.endNode().getId()-o2.endNode().getId()))*/;
-
+                .relationships(Rls.CONTAINS, Direction.OUTGOING);
         return td.traverse(root);
     }
     public Node createRootNode() {
@@ -150,14 +134,8 @@ public class App1 {
     }
     private static void registerShutdownHook( final GraphDatabaseService graphDb )
     {
-        Runtime.getRuntime().addShutdownHook( new Thread()
-        {
-            @Override
-            public void run()
-            {
-                graphDb.shutdown();
-                new ZipUtils("var/myDb","zip/myDb.zip");
-            }
-        } );
+        Runtime.getRuntime().addShutdownHook(new Thread(()->{graphDb.shutdown();
+            new ZipUtils(DB_PATH,DB_PATH+".zip");}) );
     }
+
 }
